@@ -1,0 +1,89 @@
+<title>AIの未来</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* 全画面のキャンバス1枚。文字はHTMLで重ね、各シーンが自分の色の世界を持つ。 */
+:root{
+  --ink:#f3efe6; --dim:rgba(243,239,230,.62); --halo:rgba(7,10,20,.55);
+  --panel:rgba(14,16,22,.94); --ptext:#eef0f4; --pdim:#9aa1ad; --sel:#ffb547;
+  --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;overflow:hidden;background:#070a14;color:var(--ink);font:16px/1.6 var(--body)}
+body.idle{cursor:none}
+#stage{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none}
+#labels>div{position:absolute;inset:0;transition:opacity .4s}
+.lab{position:absolute;left:0;top:0;white-space:nowrap;font:500 12px/1.35 var(--mono);color:var(--ink);text-align:center;letter-spacing:.02em;will-change:transform}
+.lab span{color:var(--dim)}
+.lab.big{font-size:15px}
+.lab.chip{background:var(--halo);padding:3px 7px;border-radius:3px;margin-top:-6px}
+.cap{position:absolute;inset:0;display:flex;box-sizing:border-box;
+  padding:max(40px,7vh) max(28px,6vw,env(safe-area-inset-right,0px)) calc(max(84px,11vh) + env(safe-area-inset-bottom,0px)) max(28px,6vw,env(safe-area-inset-left,0px));
+  transition:opacity .35s ease, transform 3s ease;transform-origin:50% 50%}
+.cap.hide{opacity:0}
+.cap.tilt{transform:rotate(1deg)}
+.cap .box{word-break:auto-phrase;line-break:strict;max-width:min(34em,92vw);display:grid;gap:.7em;text-shadow:0 0 24px var(--halo),0 0 3px var(--halo)}
+.cap.c{align-items:center;justify-content:center;text-align:center}
+.cap.c .box{justify-items:center}
+.cap.bl{align-items:flex-end;justify-content:flex-start}
+.cap.tl{align-items:flex-start;justify-content:flex-start}
+.cap.tr{align-items:flex-start;justify-content:flex-end;text-align:right}
+.cap.tr .box{justify-items:end}
+.cap h1{margin:0;white-space:nowrap;font:800 clamp(56px,11vw,168px)/1 var(--display);letter-spacing:.02em;text-wrap:balance}
+.cap h2{margin:0;font:800 clamp(30px,4.6vw,64px)/1.18 var(--display);letter-spacing:.01em;text-wrap:balance}
+.cap p{margin:0;font-size:clamp(16px,1.6vw,21px);color:var(--ink);text-wrap:pretty}
+.cap .lead{font:700 clamp(21px,2.6vw,34px)/1.5 var(--body)}
+.cap .eyebrow{font:500 clamp(11px,1vw,13px)/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.cap a{color:inherit;pointer-events:auto;text-decoration:underline;text-underline-offset:2px}
+.cap a:hover,.cap a:focus-visible{color:var(--ink)}
+.cap .src{font:400 12px/1.5 var(--mono);color:var(--dim)}
+.cap .num{font:500 clamp(26px,3.4vw,46px)/1.1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.cap sup,.live sup{font-size:.6em}
+.live{position:absolute;right:max(28px,4vw,env(safe-area-inset-right,0px));top:max(28px,5vh);font:500 clamp(15px,1.7vw,22px)/1.4 var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);text-align:right;text-shadow:0 0 18px var(--halo);transition:opacity .4s}
+.hud{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:0 max(24px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));
+  font:500 12px/1 var(--mono);letter-spacing:.08em;color:var(--dim);transition:opacity .6s}
+.hud .dots{display:flex;gap:6px}
+.hud .dots i{width:6px;height:6px;border-radius:50%;background:var(--dim);opacity:.45}
+.hud .dots i[data-on]{opacity:1;background:var(--ink)}
+body.idle .hud{opacity:.35}
+.panel{pointer-events:auto;background:var(--panel);color:var(--ptext);font-family:var(--body)}
+.notes{position:absolute;left:0;right:0;bottom:0;padding:18px max(24px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 32px}
+.notes p{margin:0;max-width:60ch;font-size:18px;white-space:pre-line}
+.notes .meta{color:var(--pdim);font:13px var(--mono);white-space:nowrap;text-align:right}
+.over{position:absolute;inset:0;overflow:auto;padding:48px max(40px,env(safe-area-inset-right,0px)) 48px max(40px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:14px;align-content:start}
+.over h3{grid-column:1/-1;margin:0 0 8px;font:800 28px var(--display)}
+.over button{all:unset;cursor:pointer;padding:16px 18px;border:1px solid rgba(255,255,255,.12);display:grid;gap:6px}
+.over button b{font:700 18px var(--body)}
+.over button span{font:12px var(--mono);color:var(--pdim)}
+.over button:hover,.over button:focus-visible,.over button[aria-current=true]{border-color:var(--sel);outline:none}
+.help{position:absolute;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(52px + env(safe-area-inset-bottom,0px));padding:18px 22px;display:grid;grid-template-columns:auto auto;gap:6px 22px;max-width:calc(100vw - 48px);font-size:14px}
+.help b{font:500 13px var(--mono);color:var(--sel)}
+.help span{color:var(--ptext)}
+.toast{position:absolute;left:50%;top:28px;transform:translateX(-50%);padding:8px 16px;font-size:14px;transition:opacity .4s}
+.black{position:absolute;inset:0;background:#000;pointer-events:auto}
+#divider{position:absolute;top:0;bottom:0;width:44px;margin-left:-22px;pointer-events:none}
+#divider::before{content:"";position:absolute;left:21px;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 12px rgba(0,0,0,.25)}
+.side{position:absolute;top:max(28px,5vh);font:500 13px/1.4 var(--mono);letter-spacing:.06em;padding:6px 10px}
+.side.l{left:max(24px,env(safe-area-inset-left,0px));color:#2d3036;background:rgba(235,236,238,.8)}
+.side.r{right:max(24px,env(safe-area-inset-right,0px));color:#173238;background:rgba(240,250,248,.85)}
+@media (max-width:640px){.cap .box{max-width:92vw}.live{top:auto;bottom:calc(46px + env(safe-area-inset-bottom,0px));right:24px;font-size:13px}}
+@media (prefers-reduced-motion:reduce){.cap{transition:opacity .2s}}
+</style>
+
+<canvas id="stage" tabindex="0" aria-label="プレゼンテーション「AIの未来」"></canvas>
+<div id="ui" lang="ja">
+  <div id="labels"></div>
+  <div id="extra"></div>
+  <div id="cap" class="cap c" aria-live="polite"></div>
+  <div id="live" class="live"></div>
+  <div class="hud" id="hud"><span id="hudL"></span><span class="dots" id="dots"></span><span id="hudR"></span></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="deck.js" charset="utf-8"></script>
